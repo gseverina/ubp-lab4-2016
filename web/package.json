@@ -1,0 +1,23 @@
+{
+  "name": "web",
+  "version": "1.0.0",
+  "description": "SPI Web Application",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gseverina/ubp-lab4-2016.git"
+  },
+  "author": "Gaston Severina",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gseverina/ubp-lab4-2016/issues"
+  },
+  "homepage": "https://github.com/gseverina/ubp-lab4-2016#readme",
+  "dependencies": {
+    "express": "^4.13.4"
+  }
+}

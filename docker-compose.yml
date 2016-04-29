@@ -1,0 +1,7 @@
+web:
+  image: node:onbuild
+  ports:
+    - "8080:80"
+  volumes:
+    - ./web:/usr/src/app
+
