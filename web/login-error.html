@@ -1,16 +1,18 @@
 <html>
 <body>
-<h1 align="center">SPI - REGISTER</h1>
+<h1 align="center">SPI - LOGIN</h1>
 <hr />
+<h2 style="color: red" align="center">AUTHENTICATION ERROR</h1>
 <center>
-	<form name="login" action="/register" method="post">
+	<form name="login" action="/login" method="post">
 	    <label>username:</label>
 	    <input type="text" name="username" id="username">
 	    <br /><br />
 	    <label>password:</label>
 	    <input type="password" name="password" id="username">
 	    <br /><br />
-	    <input type="submit" value="register">
+	    <input type="submit" value="login">
+	    <a href="/register">register</a>
 	</form>
 </center>
 </body>
