@@ -1,18 +1,25 @@
-from bottle import Bottle, run, template
+from bottle import Bottle, run, request
+import json
 
 app = Bottle()
 
+@app.route('/login', method='POST')
+def post_login():
+	data = request.json
+	username = data["username"]
+	password = data["password"]
 
-@app.route('/hello')
-def hello():
-    return "Hello World!"
+	retdata = {}
+	if(username == 'pedro' and password == 'pedro123'):
+		retdata = {
+			"status": "OK"
+		}
+	else:
+		retdata = {
+			"status": "ERROR"
+		}
+
+	return retdata
 
 
-@app.route('/')
-@app.route('/hello/<name>')
-def greet(name='Stranger'):
-    return template('Hello {{name}}, how are you?', name=name)
-
-
-run(app, host='localhost', port=8080)
-
+run(app, host='127.0.0.1', port=8081, reloader=True)

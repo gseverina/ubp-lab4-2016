@@ -1,6 +1,8 @@
 var express = require('express');
-var app = express();
 var bodyParser = require('body-parser');
+var request = require('request');
+
+var app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -27,12 +29,31 @@ app.get('/login/:id', function(req, res) {
 app.post('/login', function(req, res) {
     var username = req.body.username;
     var password = req.body.password;
-    if(username == 'u' && password == 'p') {
-        res.send("OK");
-    }
-    else{
-      res.redirect("/login/1");
-    }
+
+    var options = {
+      uri: 'http://127.0.0.1:8081/login',
+      method: 'POST',
+
+      headers: {
+        "Content-type": "application/json"
+      },
+
+      json: {
+        "username": username,
+        "password": password
+      }
+    };
+
+    request(options, function (error, response, body) {
+      if (!error && response.statusCode == 200) {
+        console.log(body.status);
+        if(body.status == "OK") {
+            res.send("OK");
+        } else {
+            res.redirect("/login/1");
+        }
+      }
+    });
 });
 
 
