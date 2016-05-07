@@ -72,12 +72,32 @@ app.get('/register/:id', function(req, res) {
 app.post('/register', function(req, res) {
     var username = req.body.username;
     var password = req.body.password;
-    if(username == 'u' && password == 'p') {
-      res.redirect("/register/1");
-    }
-    else{
-        res.send("OK");
-    }
+
+    var options = {
+      uri: 'http://127.0.0.1:8081/register',
+      method: 'POST',
+
+      headers: {
+        "Content-type": "application/json"
+      },
+
+      json: {
+        "username": username,
+        "password": password
+      }
+    };
+
+    request(options, function (error, response, body) {
+      if (!error && response.statusCode == 200) {
+        console.log(body.status);
+        if(body.status == "OK") {
+            res.send("OK");
+        } else {
+            res.redirect("/register/1");
+        }
+      }
+    });
+
 });
 
 
