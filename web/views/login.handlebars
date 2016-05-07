@@ -1,8 +1,8 @@
-<html>
-<body>
 <h1 align="center">SPI - LOGIN</h1>
 <hr />
-<h2 style="color: red" align="center">AUTHENTICATION ERROR</h1>
+{{#if error_message}}
+	<h2 style="color: red" align="center">{{error_message}}</h1>
+{{/if}}
 <center>
 	<form name="login" action="/login" method="post">
 	    <label>username:</label>
@@ -15,6 +15,3 @@
 	    <a href="/register">register</a>
 	</form>
 </center>
-</body>
-</html>
-

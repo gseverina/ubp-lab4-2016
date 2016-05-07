@@ -1,10 +1,14 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var request = require('request');
+var handlebars = require('express-handlebars')
+    .create({ defaultLayout:'main' });
 
 var app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
+app.engine('handlebars', handlebars.engine);
+app.set('view engine', 'handlebars');
 
 
 /** DASHBOARD **/
@@ -17,13 +21,13 @@ app.get('/', function (req, res) {
 /** LOGIN **/
 
 app.get('/login', function(req, res) {
-    res.sendFile(__dirname + "/" + "login.html");
+    //res.sendFile(__dirname + "/" + "login.html");
+    res.render('login')
 });
 
 app.get('/login/:id', function(req, res) {
     var id = req.params.id;
-    console.log("id: %s", id);
-    res.sendFile(__dirname + "/" + "login-error.html");
+    res.render('login',{error_message: "AUTHENTICATION ERROR"})
 });
 
 app.post('/login', function(req, res) {
@@ -48,7 +52,7 @@ app.post('/login', function(req, res) {
       if (!error && response.statusCode == 200) {
         console.log(body.status);
         if(body.status == "OK") {
-            res.send("OK");
+            res.render('home');
         } else {
             res.redirect("/login/1");
         }
@@ -60,13 +64,12 @@ app.post('/login', function(req, res) {
 /** REGISTER **/
 
 app.get('/register', function(req, res) {
-    res.sendFile(__dirname + "/" + "register.html");
+    res.render('register')
 });
 
 app.get('/register/:id', function(req, res) {
     var id = req.params.id;
-    console.log("id: %s", id);
-    res.sendFile(__dirname + "/" + "register-error.html");
+    res.render('register',{error_message: "USER ALREADY EXISTS"})
 });
 
 app.post('/register', function(req, res) {
@@ -91,7 +94,7 @@ app.post('/register', function(req, res) {
       if (!error && response.statusCode == 200) {
         console.log(body.status);
         if(body.status == "OK") {
-            res.send("OK");
+            res.render("home");
         } else {
             res.redirect("/register/1");
         }
