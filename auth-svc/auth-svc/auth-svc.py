@@ -1,6 +1,6 @@
 from bottle import Bottle, run, request
 import logging
-import mysql.connector
+import pymysql
 
 '''
 	LOGGER
@@ -29,10 +29,9 @@ MYSQL
 
 mysql_config = {
     'user': 'root',
-    'password': 'intel123',
+    'passwd': 'intel123',
     'host': '127.0.0.1',
-    'database': 'spi',
-    'raise_on_warnings': True,
+    'db': 'spi'
 }
 
 logger.info('Starting Bottle...')
@@ -52,7 +51,7 @@ def post_login():
     password = data["password"]
 
     try:
-        cnx = mysql.connector.connect(**mysql_config)
+        cnx = pymysql.connect(**mysql_config)
         cursor = cnx.cursor()
         select_user = "SELECT count(*) FROM users WHERE username = %s and password = %s"
         data_user = (username, password)
@@ -69,17 +68,16 @@ def post_login():
                     "status": "ERROR"
                 }
                 logger.info("Login ERROR")
-
         cursor.close()
-        cnx.close
-
-    except mysql.connector.Error as err:
+    except pymysql.Error as err:
         msg = "Failed to select user: {}".format(err)
         logger.error(msg)
         retdata = {
             "status": "ERROR",
             "message": msg
         }
+    finally:
+        cnx.close()
 
     return retdata
 
@@ -98,7 +96,7 @@ def post_register():
     password = data["password"]
 
     try:
-        cnx = mysql.connector.connect(**mysql_config)
+        cnx = pymysql.connect(**mysql_config)
         cursor = cnx.cursor()
         inert_user = "INSERT INTO users (username, password) VALUES (%s, %s)"
         data_user = (username, password)
@@ -108,15 +106,16 @@ def post_register():
         retdata = {
             "status": "OK"
         }
-    except mysql.connector.Error as err:
+    except pymysql.Error as err:
         msg = "Failed to register user: {}".format(err)
         logger.error(msg)
         retdata = {
             "status": "ERROR",
             "message": msg
         }
+    finally:
+        cnx.close()
 
-    cnx.close()
     return retdata
 
 
