@@ -34,3 +34,5 @@ node_modules
 
 .idea
 
+#python virtualenv directory
+venv
