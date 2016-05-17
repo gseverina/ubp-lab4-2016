@@ -1,6 +1,7 @@
 from bottle import Bottle, run, request
 import logging
 import pymysql
+import os
 
 '''
 	LOGGER
@@ -28,14 +29,29 @@ MYSQL
 '''
 
 mysql_config = {
-    'user': 'root',
-    'passwd': 'intel123',
-    'host': '127.0.0.1',
+    'user': 'dev',
+    'passwd': '123456',
+    'host': os.environ['MYSQL_PORT_3306_TCP_ADDR'],
     'db': 'spi'
 }
 
 logger.info('Starting Bottle...')
 app = Bottle()
+
+
+'''
+GET: /test
+'''
+
+
+@app.route('/test', method='GET')
+def get_test():
+    logger.info('Processing GET /test')
+    retdata = {
+        "status": "OK"
+    }
+    return retdata
+
 
 '''
 POST: /login
@@ -123,4 +139,4 @@ def post_register():
 RUN APP
 '''
 
-run(app, host='127.0.0.1', port=8081, reloader=True)
+run(app, host='0.0.0.0', port=8081, reloader=True)

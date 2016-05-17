@@ -36,3 +36,5 @@ node_modules
 
 #python virtualenv directory
 venv
+.pyc
+

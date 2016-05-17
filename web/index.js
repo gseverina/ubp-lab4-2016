@@ -35,7 +35,7 @@ app.post('/login', function(req, res) {
     var password = req.body.password;
 
     var options = {
-      uri: 'http://127.0.0.1:8081/login',
+      uri: 'http://' + process.env.AUTH_SVC_PORT_8081_TCP_ADDR + ':8081/login',
       method: 'POST',
 
       headers: {
@@ -77,7 +77,7 @@ app.post('/register', function(req, res) {
     var password = req.body.password;
 
     var options = {
-      uri: 'http://127.0.0.1:8081/register',
+      uri: 'http://' + process.env.AUTH_SVC_PORT_8081_TCP_ADDR + ':8081/register',
       method: 'POST',
 
       headers: {
@@ -106,7 +106,7 @@ app.post('/register', function(req, res) {
 
 /** SERVER **/
 
-var server = app.listen(8080, '127.0.0.1', function () {
+var server = app.listen(8080, '0.0.0.0', function () {
   var host = server.address().address;
   var port = server.address().port;
   console.log("example app listening at http://%s:%s", host, port);
