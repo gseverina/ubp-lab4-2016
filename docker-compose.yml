@@ -8,12 +8,9 @@ web:
     - auth-svc
 
 auth-svc:
-  image: python:2-onbuild
+  build: auth-svc
   ports:
     - "8081:8081"
-  volumes:
-    - ./auth-svc:/usr/src/app
-  command: bash -c "pip install -r /usr/src/app/requirements.txt;python /usr/src/app/auth-svc/auth-svc.py"
   links:
   - mysql
 
