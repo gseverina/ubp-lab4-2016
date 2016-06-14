@@ -29,14 +29,41 @@ MYSQL
 '''
 
 mysql_config = {
-    'user': 'dev',
-    'passwd': '123456',
-    'host': os.environ['MYSQL_PORT_3306_TCP_ADDR'],
-    'db': 'spi'
+    'host': os.environ['MYSQL_ENDPOINT'],
+    'user': os.environ['MYSQL_USER'],
+    'passwd': os.environ['MYSQL_PASSWORD'],
+    'db': os.environ['MYSQL_DATABASE']
 }
 
 logger.info('Starting Bottle...')
 app = Bottle()
+
+
+'''
+DB INIT
+'''
+def init_db():
+    logger.info('Processing init database')
+    try:
+        cnx = pymysql.connect(**mysql_config)
+        cursor = cnx.cursor()
+        
+        #create_db = "create database if not exists spi"
+        #cursor.execute(create_db)
+        #cursor.close()
+
+        create_table = "create table if not exists spi.users(username varchar(50), password varchar(50))"
+        cursor.execute(create_table)
+        cursor.close()
+
+    except pymysql.Error as err:
+        msg = "Failed init database: {}".format(err)
+        logger.error(msg)
+    finally:
+        cnx.close()
+
+    return
+ 
 
 
 '''
@@ -139,4 +166,5 @@ def post_register():
 RUN APP
 '''
 
+init_db()
 run(app, host='0.0.0.0', port=8081, reloader=True)
