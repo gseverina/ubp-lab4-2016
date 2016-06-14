@@ -2,6 +2,7 @@ from bottle import Bottle, run, request
 import logging
 import pymysql
 import os
+import time
 
 '''
 	LOGGER
@@ -44,6 +45,8 @@ DB INIT
 '''
 def init_db():
     logger.info('Processing init database')
+    time.sleep(30)
+
     try:
         cnx = pymysql.connect(**mysql_config)
         cursor = cnx.cursor()
