@@ -1,3 +1,4 @@
+import json
 import logging
 
 from bottle import Bottle, run, request
@@ -8,17 +9,17 @@ logger = logging.getLogger('img-proc-api-svc')
 logger.setLevel(logging.DEBUG)
 logger.propagate = False
 # create file handler
-#fh = logging.FileHandler('img-proc-api-svc.log')
-#fh.setLevel(logging.DEBUG)
+# fh = logging.FileHandler('img-proc-api-svc.log')
+# fh.setLevel(logging.DEBUG)
 # create console handler
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
 # create formatter and add it to the handlers
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-#fh.setFormatter(formatter)
+# fh.setFormatter(formatter)
 ch.setFormatter(formatter)
 # add the handlers to the logger
-#logger.addHandler(fh)
+# logger.addHandler(fh)
 logger.addHandler(ch)
 
 QUEUE_NAME = 'task_queue'
@@ -34,13 +35,12 @@ def post_jobs():
 
     connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq'))
     channel = connection.channel()
-
     # Creates the queue
-    channel.queue_declare(queue=QUEUE_NAME)
+    # channel.queue_declare(queue=QUEUE_NAME)
 
     channel.basic_publish(exchange='',
                           routing_key=QUEUE_NAME,
-                          body=data,
+                          body=json.dumps(data),
                           properties=pika.BasicProperties(
                               delivery_mode=2,  # make message persistent
                           ))
