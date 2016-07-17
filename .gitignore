@@ -41,3 +41,6 @@ venv
 #database directory
 database
 
+img-processor-svc/worker-svc/build
+.gradle
+
