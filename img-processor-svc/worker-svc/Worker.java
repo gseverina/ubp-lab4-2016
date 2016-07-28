@@ -8,7 +8,7 @@ public class Worker {
 
   public static void main(String[] argv) throws Exception {
     ConnectionFactory factory = new ConnectionFactory();
-    factory.setHost("10.64.173.56");
+    factory.setHost("rabbitmq");
     factory.setPort(5672);
     final Connection connection = factory.newConnection();
     final Channel channel = connection.createChannel();

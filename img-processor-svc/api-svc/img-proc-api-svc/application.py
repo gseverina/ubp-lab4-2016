@@ -1,8 +1,12 @@
 import json
 import logging
+import os
+import time
+import uuid
 
 from bottle import Bottle, run, request
 import pika
+import pymysql
 
 
 logger = logging.getLogger('img-proc-api-svc')
@@ -22,16 +26,104 @@ ch.setFormatter(formatter)
 # logger.addHandler(fh)
 logger.addHandler(ch)
 
+
+TAG_ORIGINAL_IMAGE_URL = 'originalImageUrl'
+TAG_FILTER_ID = 'filterId'
+TAG_RESULT_IMAGE_URL = 'resultImageUrl'
+TAG_STATUS = 'status'
+TAG_JOB_ID = 'jobId'
+
 QUEUE_NAME = 'task_queue'
+
+
+mysql_config = {
+    'host': os.environ['MYSQL_ENDPOINT'],
+    'user': os.environ['MYSQL_USER'],
+    'passwd': os.environ['MYSQL_PASSWORD'],
+    'db': os.environ['MYSQL_DATABASE']
+}
+
 
 app = Bottle()
 
 
-@app.route('/jobs', method='POST')
-def post_jobs():
-    logger.info('Processing POST /jobs')
-    data = request.json
-    logger.info('body: {0}'.format(data))
+def init_db():
+    """
+    DB INIT
+    """
+    logger.info('Processing init database')
+
+    try:
+        cnx = pymysql.connect(**mysql_config)
+        cursor = cnx.cursor()
+
+        create_db = "create database if not exists spi"
+        cursor.execute(create_db)
+
+        create_table = "create table if not exists spi.jobs(user_id varchar(25)," \
+                       "job_id varchar(50), status varchar(25)," \
+                       "original_image_url varchar(100), filter_id varchar(50)," \
+                       "result_image_url varchar(100))"
+        cursor.execute(create_table)
+        cursor.close()
+
+    except pymysql.Error as err:
+        msg = "Failed init database: {}".format(err)
+        logger.error(msg)
+    finally:
+        cnx.close()
+
+    return
+
+
+def get_jobs(user_id, job_id):
+
+    try:
+        cnx = pymysql.connect(**mysql_config)
+        cursor = cnx.cursor()
+        query_all = "SELECT job_id, status, original_image_url, filter_id, result_image_url FROM jobs WHERE user_id = %s"
+        query_one = "SELECT job_id, status, original_image_url, filter_id, result_image_url FROM jobs WHERE user_id = %s AND job_id = %s"
+        query = query_all if job_id is None else query_one
+        query_data = user_id if job_id is None else (user_id, job_id)
+        cursor.execute(query, query_data)
+        results = cursor.fetchall()
+        jobs = []
+        for row in results:
+            job = {
+                TAG_JOB_ID: row[0],
+                TAG_STATUS: row[1],
+                TAG_ORIGINAL_IMAGE_URL: row[2],
+                TAG_FILTER_ID: row[3]
+            }
+            jobs.append(job)
+        cursor.close()
+
+        return jobs
+
+    except pymysql.Error as err:
+        msg = "Failed get jobs: {0}".format(err)
+        logger.error(msg)
+        raise
+
+
+def add_job(job_data):
+    user_id = '1111'
+    job_id = str(uuid.uuid4())
+    job_data['jobId'] = job_id
+    try:
+        cnx = pymysql.connect(**mysql_config)
+        cursor = cnx.cursor()
+        query = "INSERT INTO jobs (user_id, job_id, status, original_image_url, filter_id)" \
+                "VALUES (%s, %s, %s, %s, %s)"
+        query_data = (user_id, job_id, "IN_PROCESS", job_data[TAG_ORIGINAL_IMAGE_URL],
+                      job_data[TAG_FILTER_ID])
+        cursor.execute(query, query_data)
+        cnx.commit()
+        cursor.close()
+    except pymysql.Error as err:
+        msg = "Failed to insert job: {0}".format(err)
+        logger.error(msg)
+        raise
 
     connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq'))
     channel = connection.channel()
@@ -40,10 +132,53 @@ def post_jobs():
 
     channel.basic_publish(exchange='',
                           routing_key=QUEUE_NAME,
-                          body=json.dumps(data),
+                          body=json.dumps(job_data),
                           properties=pika.BasicProperties(
                               delivery_mode=2,  # make message persistent
                           ))
 
+    return job_data
+
+
+@app.route('/jobs', method='GET')
+@app.route('/jobs/<job_id>', method='GET')
+def handler_get_jobs(job_id=None):
+    logger.info('Processing GET /jobs')
+
+    user_id = '1111'
+
+    try:
+        jobs = get_jobs(user_id, job_id)
+        res_data = {
+            "jobs": jobs
+        }
+        return res_data
+    except Exception as ex:
+        msg = ex.message
+        error_data = {
+            "status": "ERROR",
+            "message": msg
+        }
+        return error_data
+
+
+@app.route('/jobs', method='POST')
+def handler_post_jobs():
+    logger.info('Processing POST /jobs')
+    data = request.json
+    logger.info('body: {0}'.format(data))
+    try:
+        job = add_job(data)
+        return job
+    except Exception as ex:
+        msg = ex.message
+        error_data = {
+            "status": "ERROR",
+            "message": msg
+        }
+        return error_data
+
+
 logger.info('Starting Image Processor API Service...')
+init_db()
 run(app, host='0.0.0.0', port=8082, reloader=True)
