@@ -142,6 +142,7 @@ def add_job(job_data):
 
 
 @app.route('/jobs', method='GET')
+@app.route('/jobs/', method='GET')
 @app.route('/jobs/<job_id>', method='GET')
 def handler_get_jobs(job_id=None):
     logger.info('Processing GET /jobs')
