@@ -8,6 +8,7 @@ from bottle import Bottle, run, request
 import pika
 import pymysql
 
+LISTEN_PORT = 8082
 
 logger = logging.getLogger('img-proc-api-svc')
 logger.setLevel(logging.DEBUG)
@@ -179,6 +180,6 @@ def handler_post_jobs():
         return error_data
 
 
-logger.info('Starting Image Processor API Service...')
 init_db()
-run(app, host='0.0.0.0', port=8082, reloader=True)
+logger.info('Starting Image Processor API Service on port {0}'.format(LISTEN_PORT))
+run(app, host='0.0.0.0', port=LISTEN_PORT, reloader=True)
