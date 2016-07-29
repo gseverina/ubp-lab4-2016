@@ -4,30 +4,27 @@ import pymysql
 import os
 import time
 
-'''
-	LOGGER
-'''
+LISTEN_PORT = 8081
+
+
 # create logger with 'auth-svc'
 logger = logging.getLogger('auth-svc')
 logger.setLevel(logging.DEBUG)
+logger.propagate = False
 # create file handler which logs even debug messages
-fh = logging.FileHandler('auth-svc.log')
-fh.setLevel(logging.DEBUG)
+#fh = logging.FileHandler('auth-svc.log')
+#fh.setLevel(logging.DEBUG)
 # create console handler with a higher log level
 ch = logging.StreamHandler()
-ch.setLevel(logging.ERROR)
+ch.setLevel(logging.DEBUG)
 # create formatter and add it to the handlers
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-fh.setFormatter(formatter)
+#fh.setFormatter(formatter)
 ch.setFormatter(formatter)
 # add the handlers to the logger
-logger.addHandler(fh)
+#logger.addHandler(fh)
 logger.addHandler(ch)
 
-
-'''
-MYSQL
-'''
 
 mysql_config = {
     'host': os.environ['MYSQL_ENDPOINT'],
@@ -36,13 +33,9 @@ mysql_config = {
     'db': os.environ['MYSQL_DATABASE']
 }
 
-logger.info('Starting Bottle...')
 app = Bottle()
 
 
-'''
-DB INIT
-'''
 def init_db():
     logger.info('Processing init database')
     time.sleep(30)
@@ -66,12 +59,6 @@ def init_db():
         cnx.close()
 
     return
- 
-
-
-'''
-GET: /test
-'''
 
 
 @app.route('/test', method='GET')
@@ -81,11 +68,6 @@ def get_test():
         "status": "OK"
     }
     return retdata
-
-
-'''
-POST: /login
-'''
 
 
 @app.route('/login', method='POST')
@@ -128,11 +110,6 @@ def post_login():
     return retdata
 
 
-'''
-POST: /register
-'''
-
-
 @app.route('/register', method='POST')
 def post_register():
     logger.info('Processing POST /register')
@@ -170,4 +147,5 @@ RUN APP
 '''
 
 init_db()
-run(app, host='0.0.0.0', port=8081, reloader=True)
+logger.info('Starting Authentication Service on port {0}'.format(LISTEN_PORT))
+run(app, host='0.0.0.0', port=LISTEN_PORT, reloader=True)
