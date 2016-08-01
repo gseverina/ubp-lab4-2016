@@ -1,0 +1,23 @@
+<h1 align="center">SPI - DASHBOARD</h1>
+<hr />
+{{#if error_message}}
+	<h2 style="color: red" align="center">{{error_message}}</h2>
+{{/if}}
+<center>
+    <table>
+        <tr>
+            <th>Filter ID</th>
+            <th>Job ID</th>
+            <th>Image URL</th>
+            <th>Status</th>
+        </tr>
+{{#each jobs}}
+        <tr>
+            <td>{{this.filterId}}</td>
+            <td>{{this.jobId}}</td>
+            <td>{{this.originalImageUrl}}</td>
+            <td>{{this.status}}</td>
+        <tr>
+{{/each}}
+    </table>
+</center>

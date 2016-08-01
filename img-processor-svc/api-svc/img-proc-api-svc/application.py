@@ -38,7 +38,7 @@ QUEUE_NAME = 'task_queue'
 
 
 mysql_config = {
-    'host': os.environ['MYSQL_ENDPOINT'],
+    'host': 'mysql',
     'user': os.environ['MYSQL_USER'],
     'passwd': os.environ['MYSQL_PASSWORD'],
     'db': os.environ['MYSQL_DATABASE']
@@ -139,6 +139,17 @@ def add_job(job_data):
                           ))
 
     return job_data
+
+
+@app.route('/test', method='GET')
+def handler_get_test():
+    logger.info('Processing GET /test')
+
+    data = {
+        "status": "OK",
+        "message": "TEST OK"
+        }
+    return data
 
 
 @app.route('/jobs', method='GET')

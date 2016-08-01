@@ -22,6 +22,7 @@
     "express": "^4.13.4",
     "express-handlebars": "^3.0.0",
     "forever": "^0.15.1",
+    "log": "^1.4.0",
     "request": "^2.72.0"
   }
 }
