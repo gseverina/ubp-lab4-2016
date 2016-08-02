@@ -9,9 +9,14 @@ public class Worker {
   private static final String TASK_QUEUE_NAME = "task_queue";
 
   public static void main(String[] argv) throws Exception {
+    String rabbitHost = (argv.length > 0 ? argv[0].trim() : "rabbitmq");
+    int rabbitPort = (argv.length > 1 ? Integer.parseInt(argv[1].trim()) : 5672);
+    System.out.println("rabbitHost: " + rabbitHost + ", rabbitPort: " + rabbitPort);
+
     ConnectionFactory factory = new ConnectionFactory();
-    factory.setHost("0.0.0.0");
-    factory.setPort(5672);
+    factory.setHost(rabbitHost);
+    factory.setPort(rabbitPort);
+
     final Connection connection = factory.newConnection();
     final Channel channel = connection.createChannel();
 
