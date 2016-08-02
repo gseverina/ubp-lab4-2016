@@ -1,13 +1,13 @@
 version: "2"
 services:
   web:
-    image: node:onbuild
+    build: web
     ports:
       - "8080:8080"
-    volumes:
-      - ./web:/usr/src/app
     depends_on:
       - auth-svc
+      - img-proc-api-svc
+      - storage-svc
 
   auth-svc:
     build: auth-svc
@@ -28,10 +28,19 @@ services:
     depends_on:
       - mysql
       - rabbitmq
+      - img-proc-worker-svc
     environment:
       MYSQL_USER: dev
       MYSQL_PASSWORD: 123456
       MYSQL_DATABASE: spi
+
+  img-proc-worker-svc:
+    build: img-processor-svc/worker-svc
+    depends_on:
+      - rabbitmq
+
+  storage-svc:
+    build: storage-svc
 
   mysql:
     image: mysql:5.7
