@@ -38,7 +38,6 @@ app = Bottle()
 
 def init_db():
     logger.info('Processing init database')
-    time.sleep(5)
 
     try:
         cnx = pymysql.connect(**mysql_config)

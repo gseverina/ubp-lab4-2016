@@ -14,5 +14,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # tell the port number the container should expose
 EXPOSE 8081
 
-# run the application
-CMD ["python", "/usr/src/app/auth-svc/auth-svc.py"]
+# Wait for mysql and run the application
+CMD sleep 5 && python /usr/src/app/auth-svc/auth-svc.py
