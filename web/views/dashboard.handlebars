@@ -14,10 +14,16 @@
 {{#each jobs}}
         <tr>
             <td>{{this.filterId}}</td>
-            <td>{{this.jobId}}</td>
+            <td><a href="#">{{this.jobId}}</a></td>
             <td>{{this.originalImageUrl}}</td>
             <td>{{this.status}}</td>
         <tr>
 {{/each}}
     </table>
 </center>
+<hr />
+<form name="createjob" action="/createjob" method="GET">
+    <input type="submit" value="New Job">
+</form>
+
+

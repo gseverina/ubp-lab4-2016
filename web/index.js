@@ -71,6 +71,12 @@ app.get('/dashboard', function(req, res) {
     });
 });
 
+/** CREATE JOB **/
+
+app.get('/createjob', function(req, res) {
+    res.render('createjob');
+});
+
 /** LOGIN **/
 
 app.get('/login', function(req, res) {
