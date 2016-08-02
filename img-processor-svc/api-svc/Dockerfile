@@ -14,5 +14,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # tell the port number the container should expose
 EXPOSE 8082
 
-# run the application
-CMD ["python", "/usr/src/app/img-proc-api-svc/application.py"]
+# Wait for mysql and rabbitmq and run the application
+CMD sleep 5 && python /usr/src/app/img-proc-api-svc/application.py
