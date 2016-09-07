@@ -2,6 +2,7 @@ import logging
 import os
 import uuid
 
+from base64 import decodestring
 from bottle import Bottle, run, request, static_file
 
 LISTEN_PORT = 8083
@@ -23,6 +24,15 @@ STORAGE_DIR = os.path.join(BASE_DIR, "storage")
 app = Bottle()
 
 
+@app.route('/test', method='GET')
+def get_test():
+    logger.info('Processing GET /test')
+    retdata = {
+        "status": "OK"
+    }
+    return retdata
+
+
 @app.route('/')
 def home():
     return static_file('upload.html', root=STATIC_FILES_DIR)
@@ -35,15 +45,24 @@ def serve_storage(filename):
 
 @app.route('/upload', method='POST')
 def do_upload():
-    upload = request.files.get('upload')
-    name, file_ext = os.path.splitext(upload.filename)
+    data = request.json
+    logger.info(data)
+    base64 = data["content"]
+    contentType = data["contentType"]
+
+    #upload = request.files.get('upload')
+    name, file_ext = os.path.splitext("img.jpg")
     if file_ext not in ('.png', '.jpg', '.jpeg'):
         return 'File extension not allowed.'
 
     file_id = str(uuid.uuid4())
     file_name = file_id + file_ext
     save_path = os.path.join(STORAGE_DIR, file_name)
-    upload.save(save_path)  # appends upload.filename automatically
+    #upload.save(save_path)  # appends upload.filename automatically
+
+    with open(save_path, "wb") as f:
+        f.write(decodestring(base64))
+
     return file_name
 
 logger.info('Starting Storage Service on port {0}'.format(LISTEN_PORT))
