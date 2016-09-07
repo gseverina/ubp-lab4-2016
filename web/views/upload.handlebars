@@ -4,8 +4,7 @@
 	<h2 style="color: red" align="center">{{error_message}}</h1>
 {{/if}}
 <center>
-	<!--form name="upload" action="http://storage-svc:8083/upload" method="post" enctype="multipart/form-data"-->
-	<form name="jobs" action="/jobs" method="post">
+	<form name="jobs" action="/upload" method="post" enctype=multipart/form-data>
 	    <label>Filter:</label>
         <select name="filterId" id="filterId">
             <option>Filter 1</option>
@@ -14,7 +13,7 @@
         </select>
 	    <br /><br />
 	    <label>Image:</label>
-        <input type="file" name="upload" id="upload" />
+        <input type="file" name="sampleFile" />
 	    <br /><br />
 	    <input type="submit" value="upload">
 	</form>

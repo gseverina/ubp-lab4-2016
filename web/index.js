@@ -1,5 +1,7 @@
 var express = require('express');
+//var busboy = require('express-busboy');
 var bodyParser = require('body-parser');
+var fileUpload = require('express-fileupload');
 var request = require('request');
 var handlebars = require('express-handlebars')
     .create({ defaultLayout:'main' });
@@ -12,7 +14,8 @@ var app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
-
+//app.use(busboy());
+app.use(fileUpload());
 
 app.get('/', function (req, res) {
     res.redirect('/login');
@@ -75,6 +78,69 @@ app.get('/dashboard', function(req, res) {
 
 app.get('/createjob', function(req, res) {
     res.render('createjob');
+});
+
+app.post('/jobs', function(req, res) {
+    console.log("filterId: %s", req.body.filterId);
+    console.log("upload: %s", req.files.upload);
+    var filterId = req.body.filterId;
+    //var img = req.body.upload;
+});
+
+app.get('/upload', function(req,res) {
+    res.render('upload');
+});
+
+app.post('/upload', function(req, res) {
+    console.log("filterId: %s", req.body.filterId); 
+    var sampleFile;
+ 
+    if (!req.files) {
+        res.send('No files were uploaded.');
+        return;
+    }
+ 
+    sampleFile = req.files.sampleFile;
+    var base64data = new Buffer(sampleFile.data, 'binary').toString('base64');
+    console.log("Base64: %s", base64data);
+
+    /*
+    sampleFile.mv('/tmp/filename.jpg', function(err) {
+        if (err) {
+            res.status(500).send(err);
+        }
+        else {
+            res.send('File uploaded!');
+        }
+    });
+    */
+
+    var options = {
+        uri: 'http://storage-svc:8083/upload',
+        method: 'POST',
+
+        headers: {
+            "Content-type": "application/json"
+        },
+
+        json: {
+            "content": base64data,
+            "contentType":"image/jpeg"
+        }
+    };
+
+    request(options, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+            log.info(body);
+            console.log(body.status);
+            if(body.status == "OK") {
+                res.redirect('/dashboard');
+            } else {
+                res.redirect("/dashboard/1");
+            }
+        }
+    });
+
 });
 
 /** LOGIN **/
