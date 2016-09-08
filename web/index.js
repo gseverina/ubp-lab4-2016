@@ -24,28 +24,7 @@ app.get('/', function (req, res) {
 /** DASHBOARD **/
 
 app.get('/dashboard', function(req, res) {
-    /*
-    log.info("DASHBOARD...");
-    var jobs = {
-        "jobs": [
-            {
-                "filterId": "1",
-                "jobId": "fc8f58f6-d583-44be-b65b-0d142c6317c8",
-                "originalImageUrl": "originalUrl",
-                "status": "IN_PROCESS"
-            },
-            {
-                "filterId": "2",
-                "jobId": "ac8f58f6-d583-44be-b65b-0d142c6317c8",
-                "originalImageUrl": "originalUrl",
-                "status": "COMPLETED"
-            }        
-        ]
-    };
 
-    res.render('dashboard', jobs);
-
-    */
     var options = {
         uri: 'http://img-proc-api-svc:8082/jobs',
         method: 'GET',
@@ -77,46 +56,24 @@ app.get('/dashboard', function(req, res) {
 /** CREATE JOB **/
 
 app.get('/createjob', function(req, res) {
-    res.render('createjob');
+    res.render('upload');
 });
 
 app.post('/jobs', function(req, res) {
     console.log("filterId: %s", req.body.filterId);
-    console.log("upload: %s", req.files.upload);
-    var filterId = req.body.filterId;
-    //var img = req.body.upload;
-});
-
-app.get('/upload', function(req,res) {
-    res.render('upload');
-});
-
-app.post('/upload', function(req, res) {
-    console.log("filterId: %s", req.body.filterId); 
+    var filerId = req.body.filterId;
     var sampleFile;
- 
+
     if (!req.files) {
         res.send('No files were uploaded.');
         return;
     }
- 
+
     sampleFile = req.files.sampleFile;
     var base64data = new Buffer(sampleFile.data, 'binary').toString('base64');
-    console.log("Base64: %s", base64data);
-
-    /*
-    sampleFile.mv('/tmp/filename.jpg', function(err) {
-        if (err) {
-            res.status(500).send(err);
-        }
-        else {
-            res.send('File uploaded!');
-        }
-    });
-    */
 
     var options = {
-        uri: 'http://storage-svc:8083/upload',
+        uri: 'http://storage-svc:8083/file',
         method: 'POST',
 
         headers: {
@@ -134,14 +91,41 @@ app.post('/upload', function(req, res) {
             log.info(body);
             console.log(body.status);
             if(body.status == "OK") {
-                res.redirect('/dashboard');
+                var fileId = body.fileId;
+                console.log("Uploaded file %s", fileId);
+
+                var options = {
+                    uri: 'http://img-proc-api-svc:8082/jobs',
+                    method: 'POST',
+
+                    headers: {
+                        "Content-type": "application/json"
+                    },
+
+                    json: {
+                        "originalImageUrl": "http://storage-svc:8083/file/" + fileId,
+                        "filterId": filerId
+                    }
+                };
+
+                request(options, function (error, response, body) {
+                    if (!error && response.statusCode == 200) {
+                        log.info("POST /jobs result: %s", body);
+                        console.log(body.status);
+                        if (body.status == "OK") {
+                            res.redirect('/dashboard');
+                        } else {
+                            res.redirect("/dashboard/1");
+                        }
+                    }
+                });
             } else {
                 res.redirect("/dashboard/1");
             }
         }
     });
-
 });
+
 
 /** LOGIN **/
 

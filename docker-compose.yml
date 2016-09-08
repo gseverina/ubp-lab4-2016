@@ -41,6 +41,8 @@ services:
 
   storage-svc:
     build: storage-svc
+    volumes:
+      - /tmp/storage-svc:/usr/src/app/storage-svc/storage
 
   mysql:
     image: mysql:5.7

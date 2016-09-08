@@ -182,7 +182,11 @@ def handler_post_jobs():
     logger.info('body: {0}'.format(data))
     try:
         job = add_job(data)
-        return job
+        data = {
+            "status": "OK",
+            "message": job
+        }
+        return data
     except Exception as ex:
         msg = ex.message
         error_data = {
