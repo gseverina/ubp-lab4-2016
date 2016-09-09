@@ -141,6 +141,25 @@ def add_job(job_data):
     return job_data
 
 
+def update_job(job_data):
+    user_id = '1111'
+    job_id = job_data['jobId']
+    try:
+        cnx = pymysql.connect(**mysql_config)
+        cursor = cnx.cursor()
+        query = "UPDATE jobs SET status = %s, original_image_url = %s WHERE user_id = %s AND job_id = %s"
+        query_data = (job_data[TAG_STATUS], job_data[TAG_RESULT_IMAGE_URL], user_id, job_id)
+        cursor.execute(query, query_data)
+        cnx.commit()
+        cursor.close()
+    except pymysql.Error as err:
+        msg = "Failed to insert job: {0}".format(err)
+        logger.error(msg)
+        raise
+
+    return job_data
+
+
 @app.route('/test', method='GET')
 def handler_get_test():
     logger.info('Processing GET /test')
@@ -182,6 +201,28 @@ def handler_post_jobs():
     logger.info('body: {0}'.format(data))
     try:
         job = add_job(data)
+        data = {
+            "status": "OK",
+            "message": job
+        }
+        return data
+    except Exception as ex:
+        msg = ex.message
+        error_data = {
+            "status": "ERROR",
+            "message": msg
+        }
+        return error_data
+
+
+@app.route('/jobs/<job_id>', method='PUT')
+def handler_put_job(job_id=None):
+    logger.info('Processing PUT /job')
+    data = request.json
+    logger.info('body: {0}'.format(data))
+    try:
+        data['jobId'] = job_id
+        job = update_job(data)
         data = {
             "status": "OK",
             "message": job
