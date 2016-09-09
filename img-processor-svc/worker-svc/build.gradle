@@ -18,6 +18,11 @@ repositories {
 
 dependencies {
     compile 'com.rabbitmq:amqp-client:3.6.3'
+    compile 'com.google.code.gson:gson:2.6.2'
+    compile 'org.slf4j:slf4j-log4j12:1.7.21'
+    compile 'commons-io:commons-io:2.5'
+    compile 'commons-codec:commons-codec:1.10'
+    compile 'org.apache.logging.log4j:log4j-core:2.6.2'
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.assertj:assertj-core:2.0.0'

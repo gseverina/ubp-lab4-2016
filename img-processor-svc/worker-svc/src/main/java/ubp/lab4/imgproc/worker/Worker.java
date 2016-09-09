@@ -1,57 +1,96 @@
 package ubp.lab4.imgproc.worker;
 
-import com.rabbitmq.client.*;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
+import com.google.gson.Gson;
 
-import java.io.IOException;
+import ubp.lab4.httpclient.HTTPClient;
+import ubp.lab4.httpclient.HTTPClientFactory;
+import ubp.lab4.httpclient.HTTPResponse;
+
+import java.io.File;
 
 public class Worker {
 
-  private static final String TASK_QUEUE_NAME = "task_queue";
+    private static final String WORK_DIR = "/tmp";
+    private static final String JOBS_SVC_BASE_URL = "http://img-proc-api-svc:8082/jobs/";
+    private static final String STORAGE_SVC_BASE_URL = "http://storage-svc:8083/file/";
 
-  public static void main(String[] argv) throws Exception {
-    String rabbitHost = (argv.length > 0 ? argv[0].trim() : "rabbitmq");
-    int rabbitPort = (argv.length > 1 ? Integer.parseInt(argv[1].trim()) : 5672);
-    System.out.println("rabbitHost: " + rabbitHost + ", rabbitPort: " + rabbitPort);
+    static Logger logger = Logger.getLogger(Worker.class);
 
-    ConnectionFactory factory = new ConnectionFactory();
-    factory.setHost(rabbitHost);
-    factory.setPort(rabbitPort);
+    private HTTPClientFactory factory = null;
 
-    final Connection connection = factory.newConnection();
-    final Channel channel = connection.createChannel();
-
-    channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
-    System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
-
-    channel.basicQos(1);
-
-    final Consumer consumer = new DefaultConsumer(channel) {
-      @Override
-      public void handleDelivery(String consumerTag, Envelope envelope,
-                                 AMQP.BasicProperties properties, byte[] body) throws IOException {
-        String message = new String(body, "UTF-8");
-
-        System.out.println(" [x] Received '" + message + "'");
-        try {
-          doWork(message);
-        } finally {
-          System.out.println(" [x] Done");
-          channel.basicAck(envelope.getDeliveryTag(), false);
-        }
-      }
-    };
-    channel.basicConsume(TASK_QUEUE_NAME, false, consumer);
-  }
-
-  private static void doWork(String task) {
-    for (char ch : task.toCharArray()) {
-      if (ch == '.') {
-        try {
-          Thread.sleep(1000);
-        } catch (InterruptedException _ignored) {
-          Thread.currentThread().interrupt();
-        }
-      }
+    Worker(HTTPClientFactory factory) {
+        this.factory = factory;
     }
-  }
+
+    public void doWork(String task) {
+
+        try {
+
+            // Parse Task as json
+            Gson gson = new Gson();
+            TaskEntity taskEntity = gson.fromJson(task, TaskEntity.class);
+            String jobId = taskEntity.jobId;
+            String fileUrl = taskEntity.originalImageUrl;
+            String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1, fileUrl.length());
+            String filePath = WORK_DIR + "/" + fileName;
+
+            logger.info("New Task -> jobId: " + jobId);
+            logger.info("New Task -> filterId: " + taskEntity.filterId);
+            logger.info("New Task -> url: " + fileUrl);
+
+            // Get image file from storage-svc
+            HTTPClient httpClient = factory.getClient(taskEntity.originalImageUrl);
+
+            HTTPResponse response = httpClient.downloadFile(WORK_DIR);
+            int responseCode = response.code;
+            String responseData = response.data;
+            logger.info("Download response code: " + responseCode);
+            logger.info("Download response data: " + responseData);
+
+            if (responseCode >= 200 && responseCode <= 299) {
+                logger.info("got file: " + filePath);
+            }
+
+            // Process the file
+            // TODO
+
+            // Upload processed file to storage-svc
+            String fileAsBase64 = Base64.encodeBase64String(FileUtils.readFileToByteArray(new File(filePath)));
+            FileEntity file = new FileEntity("image/jpeg", fileAsBase64);
+            httpClient = factory.getClient(STORAGE_SVC_BASE_URL);
+            httpClient.setHeader("Content-Type", "application/json");
+            httpClient.setHeader("Accept", "application/json");
+            String body = gson.toJson(file);
+            response = httpClient.post(body);
+            responseCode = response.code;
+            responseData = response.data;
+            logger.info("Store file response code: " + responseCode);
+            logger.info("Store file response data: " + responseData);
+            StorageInfoEntity storageInfo = null;
+            if (responseCode >= 200 && responseCode <= 299) {
+                Gson gsonResp = new Gson();
+                storageInfo = gsonResp.fromJson(responseData, StorageInfoEntity.class);
+            }
+
+            String resultUrl = STORAGE_SVC_BASE_URL + storageInfo.fileId;
+
+            // Update job with new status and resultImageUrl
+            httpClient = factory.getClient(JOBS_SVC_BASE_URL + jobId);
+            httpClient.setHeader("Content-Type", "application/json");
+            httpClient.setHeader("Accept", "application/json");
+            JobEntity job = new JobEntity(resultUrl, "PROCESSED");
+            body = gson.toJson(job);
+            response = httpClient.put(body);
+            responseCode = response.code;
+            responseData = response.data;
+            logger.info("Update job response code: " + responseCode);
+            logger.info("Update job response data: " + responseData);
+
+        } catch(Exception e) {
+            logger.error(e);
+        }
+    }
 }
