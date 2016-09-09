@@ -35,7 +35,7 @@ dependencies {
 
 jar {
     manifest {
-        attributes 'Main-Class': 'ubp.lab4.imgproc.worker.Worker'
+        attributes 'Main-Class': 'ubp.lab4.imgproc.worker.Main'
     }
 
     from {
