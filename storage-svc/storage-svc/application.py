@@ -44,14 +44,24 @@ def serve_storage(filename):
 
 
 @app.route('/file', method='POST')
+@app.route('/file/', method='POST')
 def do_upload():
     data = request.json
     logger.info("receiving file...")
+
     base64 = data["content"]
-    contentType = data["contentType"]
-    name, file_ext = os.path.splitext("img.jpg")
+
+    content_type = data["contentType"]
+    logger.debug("content_type: {0}".format(content_type))
+    file_ext = '.{0}'.format(content_type.split('/')[1])
+
     if file_ext not in ('.png', '.jpg', '.jpeg'):
-        return 'File extension not allowed.'
+        error_data = {
+            "status": "ERROR",
+            "message": "File extension not allowed."
+        }
+        return error_data
+
     file_id = str(uuid.uuid4())
     file_name = file_id + file_ext
     save_path = os.path.join(STORAGE_DIR, file_name)
@@ -60,7 +70,7 @@ def do_upload():
 
     retdata = {
         "status": "OK",
-        "fileId": file_id
+        "fileId": file_name
     }
 
     return retdata
