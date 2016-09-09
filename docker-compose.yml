@@ -41,6 +41,8 @@ services:
 
   storage-svc:
     build: storage-svc
+    ports:
+      - "8083:8083"
     volumes:
       - /tmp/storage-svc:/usr/src/app/storage-svc/storage
 
