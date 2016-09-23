@@ -1,0 +1,4 @@
+[webservers]
+testserver1 ansible_ssh_host=10.64.142.38 ansible_ssh_port=22
+testserver2 ansible_ssh_host=10.64.143.21 ansible_ssh_port=22
+
