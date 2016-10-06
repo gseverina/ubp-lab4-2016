@@ -1,33 +1,18 @@
 - name: install docker engine
-  hosts: intel-cloud01
+  hosts: intel-cloud
   sudo: True
   environment:
     http_proxy: http://proxy-us.intel.com:911
     https_proxy: http://proxy-us.intel.com:911
   tasks:
-    #- name: upgrade python 2.7
-    #  apt: name=python2.7 state=latest update_cache=yes force=yes
+    - name: execute command curl to download docker engine installer
+      command: curl -o install.sh -fsSL https://get.docker.com/
 
-    #- name: download the Docker Engine binary
-    #  get_url: 
-    #    url: http://get.docker.com/builds/Linux/i386/docker-latest.tgz
-    #    dest: /temp/docker-latest.tgz
-    #    validate_certs: no
+    #- name: execute command chmod to set exec access to the installer
+    #  command: chmod +x ./install.sh
+    - file: path=./install.sh mode="u+rwx,g+rx,o+rx"
 
-    - name: execute command curl to download docker engine
-      command: curl -o docker-latest.tgz https://get.docker.com/builds/Linux/i386/docker-latest.tgz
+    - name: execute command to run the installer script
+      command: ./install.sh
 
-    #- name: execute command wget
-    #  command: wget https://get.docker.com/builds/Linux/i386/docker-latest.tgz -O /tmp/docker-latest.tgz
-
-    #- name: unarchive docker engine binaries
-    #  unarchive: src=/tmp/docker-latest.tgz dest=/tmp/ remote_src=yes
-
-    - name: execute command to unarchive docker engine binaries
-      command: tar -zxvf docker-latest.tgz
-
-    - name: execute command to move docker binaries to /usr/bin
-      command: mv docker/* /usr/bin/
-
-    - name: execute command to run the docker engin
-      command: dockerd &
+    - service: name=docker state=restarted
