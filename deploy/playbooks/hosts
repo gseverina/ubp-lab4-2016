@@ -6,3 +6,4 @@ intel-cloud03 ansible_ssh_host=10.64.143.110 ansible_ssh_port=22
 [ubp-lab]
 ubp-lab01 ansible_ssh_host=192.168.14.5 ansible_ssh_port=22
 ubp-lab02 ansible_ssh_host=192.168.14.6 ansible_ssh_port=22
+ubp-lab03 ansible_ssh_host=192.168.14.2 ansible_ssh_port=22

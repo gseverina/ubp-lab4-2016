@@ -1,15 +1,17 @@
 - name: install docker engine
-  hosts: intel-cloud
+  hosts: ubp-lab
   sudo: True
   environment:
-    http_proxy: http://proxy-us.intel.com:911
-    https_proxy: http://proxy-us.intel.com:911
+    #http_proxy: http://proxy-us.intel.com:911
+    #https_proxy: http://proxy-us.intel.com:911
+    http_proxy: http://proxy.lab.ubp.edu.ar:3128
+    https_proxy: http://proxy.lab.ubp.edu.ar:3128
   tasks:
+    - apt: name=curl update_cache=yes
+
     - name: execute command curl to download docker engine installer
       command: curl -o install.sh -fsSL https://get.docker.com/
 
-    #- name: execute command chmod to set exec access to the installer
-    #  command: chmod +x ./install.sh
     - file: path=./install.sh mode="u+rwx,g+rx,o+rx"
 
     - name: execute command to run the installer script
