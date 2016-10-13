@@ -8,6 +8,10 @@ import com.google.gson.Gson;
 import ubp.lab4.httpclient.HTTPClient;
 import ubp.lab4.httpclient.HTTPClientFactory;
 import ubp.lab4.httpclient.HTTPResponse;
+import ubp.lab4.imgproc.worker.entity.FileEntity;
+import ubp.lab4.imgproc.worker.entity.JobEntity;
+import ubp.lab4.imgproc.worker.entity.StorageInfoEntity;
+import ubp.lab4.imgproc.worker.entity.TaskEntity;
 
 import java.io.File;
 
@@ -35,7 +39,8 @@ public class Worker {
             String jobId = taskEntity.jobId;
             String fileUrl = taskEntity.originalImageUrl;
             String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1, fileUrl.length());
-            String filePath = WORK_DIR + "/" + fileName;
+            String originalFilePath = WORK_DIR + "/" + fileName;
+            String resultFilePath = WORK_DIR + "/" + fileName + "_processed";
 
             logger.info("New Task -> jobId: " + jobId);
             logger.info("New Task -> filterId: " + taskEntity.filterId);
@@ -51,14 +56,15 @@ public class Worker {
             logger.info("Download response data: " + responseData);
 
             if (responseCode >= 200 && responseCode <= 299) {
-                logger.info("got file: " + filePath);
+                logger.info("got file: " + originalFilePath);
             }
 
             // Process the file
-            // TODO
+            //GreyScaleFilter filter = new GreyScaleFilter();
+            //filter.process(originalFilePath, resultFilePath);
 
             // Upload processed file to storage-svc
-            String fileAsBase64 = Base64.encodeBase64String(FileUtils.readFileToByteArray(new File(filePath)));
+            String fileAsBase64 = Base64.encodeBase64String(FileUtils.readFileToByteArray(new File(originalFilePath)));
             FileEntity file = new FileEntity("image/jpeg", fileAsBase64);
             httpClient = factory.getClient(STORAGE_SVC_BASE_URL);
             httpClient.setHeader("Content-Type", "application/json");

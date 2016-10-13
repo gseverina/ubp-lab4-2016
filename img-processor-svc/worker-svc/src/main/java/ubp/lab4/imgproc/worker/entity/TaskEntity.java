@@ -1,4 +1,4 @@
-package ubp.lab4.imgproc.worker;
+package ubp.lab4.imgproc.worker.entity;
 
 /**
  * Created by lafranll on 9/8/16.

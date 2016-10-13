@@ -1,4 +1,4 @@
-package ubp.lab4.imgproc.worker;
+package ubp.lab4.imgproc.worker.entity;
 
 public class FileEntity {
     public String contentType;
