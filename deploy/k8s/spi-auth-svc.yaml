@@ -6,6 +6,7 @@ metadata:
     app: auth-svc
     tier: backend
 spec:
+  type: NodePort
   ports:
     # the port that this service should serve on
   - port: 8081
@@ -27,7 +28,7 @@ spec:
     spec:
       containers:
       - name: auth-svc
-        image: auth-svc
+        image: gseverina/auth-svc
         resources:
           requests:
             cpu: 100m

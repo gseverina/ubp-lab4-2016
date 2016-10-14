@@ -6,6 +6,7 @@ metadata:
     app: mysql
     tier: backend
 spec:
+  type: ClusterIP
   ports:
     # the port that this service should serve on
   - port: 3306
@@ -34,3 +35,13 @@ spec:
             memory: 100Mi
         ports:
         - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "123456"
+        - name: MYSQL_PASSWORD
+          value: "123456"
+        - name: MYSQL_USER
+          value: "dev"
+        - name: MYSQL_DATABASE
+          value: "spi"
+
