@@ -1,0 +1,94 @@
+- name: containers deployment
+  #hosts: aws-01
+  hosts: intel-cloud01
+  become: true
+  environment:
+    #http_proxy: http://proxy-us.intel.com:911
+    #https_proxy: http://proxy-us.intel.com:911
+  tasks:
+    - name: Install the package "python-pip"
+      apt:
+        name: python-pip
+        state: present
+
+    - name: install docker-py
+      pip: name=docker-py version=1.7.0
+
+    - name: mysql-svc container
+      docker_container:
+        name: mysql-svc
+        image: gseverina/mysql-svc
+        state: started
+        network_mode: host
+        ports:
+          - "3306:3306"
+        volumes:
+          - /var/lib/mysql:/var/lib/mysql
+        env:
+          MYSQL_ROOT_PASSWORD: 123456
+          MYSQL_USER: dev
+          MYSQL_PASSWORD: 123456
+          MYSQL_DATABASE: spi
+
+    - name: web container
+      docker_container:
+        name: web
+        image: gseverina/web:1.0.0
+        state: started
+        network_mode: host
+        ports:
+          - "8080:8080"
+
+    - name: auth-svc container
+      docker_container:
+        name: auth-svc
+        image: auth-svc
+        state: started
+        network_mode: host
+        ports:
+          - "8081:8081"
+        env:
+          MYSQL_ENDPOINT: mysql
+          MYSQL_USER: dev
+          MYSQL_PASSWORD: 123456
+          MYSQL_DATABASE: spi
+
+    - name: img-proc-api-svc container
+      docker_container:
+        name: img-proc-api-svc               
+        image: img-proc-api-svc
+        state: started
+        network_mode: host
+        ports:
+          - "8082:8082"
+        env:                      
+          MYSQL_USER: dev
+          MYSQL_PASSWORD: 123456
+          MYSQL_DATABASE: spi
+
+    - name: img-proc-worker-svc container
+      docker_container:
+        name: img-proc-worker-svc
+        image: img-proc-worker-svc
+        state: started
+        network_mode: host
+
+    - name: storage-svc
+      docker_container:
+        name: storage-svc
+        image: storage-svc
+        state: started
+        network_mode: host
+        ports:
+          - "8083:8083"
+        volumes:
+          - /tmp/storage-svc:/tmp/storage-svc
+
+    - name: rabbitmq
+      docker_container:
+        name: storage-svc
+        image: storage-svc
+        state: started
+        network_mode: host
+        ports:
+          - "5672:5672"

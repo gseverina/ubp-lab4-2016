@@ -1,0 +1,26 @@
+- name: containers deployment
+  hosts: aws-01
+  sudo: True
+  environment:
+    #http_proxy: http://proxy-us.intel.com:911
+    #https_proxy: http://proxy-us.intel.com:911
+    #http_proxy: http://proxy.lab.ubp.edu.ar:3128
+    #https_proxy: http://proxy.lab.ubp.edu.ar:3128
+  tasks:
+    #- name: install docker-py
+    #  pip: name=docker-py version=1.7.0
+    - name: mysql-svc container
+      docker_container:
+      name: mysql-svc
+      image: gseverina/mysql-svc
+      state: started
+      ports:
+        - "3306:3306"
+      volumes:
+        - /var/lib/mysql:/var/lib/mysql
+      env:
+        MYSQL_ROOT_PASSWORD: 123456
+        MYSQL_USER: dev
+        MYSQL_PASSWORD: 123456
+        MYSQL_DATABASE: spi
+

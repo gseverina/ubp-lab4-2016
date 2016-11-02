@@ -5,7 +5,7 @@ user="gseverina"
 version="1.0.0"
 
 echo "root_dir: $root_dir"
-dirs="web auth-svc img-proc-api-svc img-proc-worker-svc storage-svc"
+dirs="web mysql-svc auth-svc img-proc-api-svc img-proc-worker-svc storage-svc rabbitmq-svc"
 
 for dir in $dirs; do
     image_name=$(basename $dir)
