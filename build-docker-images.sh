@@ -4,6 +4,11 @@ root_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 user="gseverina"
 version="1.0.0"
 
+echo "building worker..."
+cd img-proc-worker-svc
+gradle jar
+cd..
+
 echo "root_dir: $root_dir"
 dirs="web mysql-svc auth-svc img-proc-api-svc img-proc-worker-svc storage-svc rabbitmq-svc"
 
