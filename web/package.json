@@ -23,6 +23,7 @@
     "express-busboy": "^4.0.0",
     "express-fileupload": "0.0.5",
     "express-handlebars": "^3.0.0",
+    "express-session": "1.15.2",
     "forever": "^0.15.1",
     "log": "^1.4.0",
     "request": "^2.72.0"

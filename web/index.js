@@ -1,4 +1,5 @@
 var express = require('express');
+var session = require('express-session');
 //var busboy = require('express-busboy');
 var bodyParser = require('body-parser');
 var fileUpload = require('express-fileupload');
@@ -16,9 +17,17 @@ app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
 //app.use(busboy());
 app.use(fileUpload());
+app.use(session({secret: 'mys3cr3t'}));
 
 app.get('/', function (req, res) {
-    res.redirect('/login');
+    var sess = req.session
+    if (sess.token) {
+        res.redirect('/dashboard')
+    }
+    else {
+        sess.token = 'token1'
+        res.redirect('/login');
+    }
 });
 
 /** DASHBOARD **/
