@@ -22,7 +22,7 @@ services:
       MYSQL_DATABASE: spi
 
   img-proc-api-svc:
-    build: img-processor-svc/api-svc
+    build: img-proc-api-svc
     ports:
       - "8082:8082"
     depends_on:
@@ -35,7 +35,7 @@ services:
       MYSQL_DATABASE: spi
 
   img-proc-worker-svc:
-    build: img-processor-svc/worker-svc
+    build: img-proc-worker-svc
     depends_on:
       - rabbitmq
 
@@ -49,7 +49,7 @@ services:
   mysql:
     image: mysql:5.7
     ports:
-      - "3307:3306"
+      - "3306:3306"
     volumes:
       - ./database:/var/lib/mysql
     environment:
