@@ -182,7 +182,7 @@ app.post('/login', function(req, res) {
         log.info(body);
         console.log(body.status);
         if(body.status == "OK") {
-            sess.token = 'token1'
+            sess.token = body.token
             res.redirect('/dashboard');
         } else {
             res.redirect("/login/1");

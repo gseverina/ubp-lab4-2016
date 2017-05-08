@@ -1,7 +1,7 @@
 FROM alpine:latest
 
 # Install python and pip
-RUN apk add --update py-pip
+RUN apk add --update build-base openssl-dev python-dev py-pip
 
 # upgrade pip
 RUN pip install --upgrade pip

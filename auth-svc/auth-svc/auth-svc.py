@@ -1,8 +1,13 @@
-from bottle import Bottle, run, request
+import datetime
+import json
 import logging
-import pymysql
 import os
 import time
+import pymysql
+from bottle import Bottle, run, request
+import Crypto.PublicKey.RSA as RSA
+import python_jwt as jwt
+import jws
 
 LISTEN_PORT = 8081
 
@@ -35,6 +40,11 @@ mysql_config = {
 
 app = Bottle()
 
+JWT_TOKEN_NOT_BEFORE_TIMEDELTA = 10
+print '##### Generating token'
+private_key_file = os.path.join(os.path.dirname(__file__), 'keypair.priv')
+with open(private_key_file, 'r') as fd:
+    private_key = RSA.importKey(fd.read())
 
 def init_db():
     logger.info('Processing init database')
@@ -86,8 +96,11 @@ def post_login():
         results = cursor.fetchall()
         for row in results:
             if row[0] == 1:
+                payload = {'userId': username};
+                token = jwt.generate_jwt(payload, private_key, 'RS256', datetime.timedelta(minutes=5))
                 retdata = {
-                    "status": "OK"
+                    "status": "OK",
+                    "token": token
                 }
                 logger.info("Login OK")
             else:
