@@ -17,7 +17,12 @@ app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
 //app.use(busboy());
 app.use(fileUpload());
-app.use(session({secret: 'mys3cr3t'}));
+app.use(session({
+    secret: 'mys3cr3t',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: true }
+}));
 
 app.get('/', function (req, res) {
     var sess = req.session
@@ -25,7 +30,6 @@ app.get('/', function (req, res) {
         res.redirect('/dashboard')
     }
     else {
-        sess.token = 'token1'
         res.redirect('/login');
     }
 });
@@ -33,6 +37,12 @@ app.get('/', function (req, res) {
 /** DASHBOARD **/
 
 app.get('/dashboard', function(req, res) {
+
+    var sess = req.session
+    if (!sess.token) {
+        res.redirect('/login');
+        return;
+    }
 
     var options = {
         uri: 'http://img-proc-api-svc:8082/jobs',
@@ -152,6 +162,7 @@ app.post('/login', function(req, res) {
     var username = req.body.username;
     var password = req.body.password;
 
+    var sess = req.session
     var options = {
       uri: 'http://auth-svc:8081/login',
       method: 'POST',
@@ -171,6 +182,7 @@ app.post('/login', function(req, res) {
         log.info(body);
         console.log(body.status);
         if(body.status == "OK") {
+            sess.token = 'token1'
             res.redirect('/dashboard');
         } else {
             res.redirect("/login/1");
