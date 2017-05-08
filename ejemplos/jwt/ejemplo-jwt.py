@@ -2,6 +2,7 @@ import json
 import os
 import datetime
 import python_jwt as jwt
+import jws
 import Crypto.PublicKey.RSA as RSA
 
 
