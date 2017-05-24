@@ -21,7 +21,7 @@ app.use(session({
     secret: 'mys3cr3t',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: true }
+    cookie: { secure: false }
 }));
 
 app.get('/', function (req, res) {
@@ -79,7 +79,7 @@ app.get('/createjob', function(req, res) {
 });
 
 app.post('/jobs', function(req, res) {
-    console.log("filterId: %s", req.body.filterId);
+    log.info("filterId: %s", req.body.filterId);
     var filerId = req.body.filterId;
     var sampleFile;
 
@@ -108,10 +108,9 @@ app.post('/jobs', function(req, res) {
     request(options, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             log.info(body);
-            console.log(body.status);
             if(body.status == "OK") {
                 var fileId = body.fileId;
-                console.log("Uploaded file %s", fileId);
+                log.info("Uploaded file %s", fileId);
 
                 var options = {
                     uri: 'http://img-proc-api-svc:8082/jobs',
@@ -130,7 +129,6 @@ app.post('/jobs', function(req, res) {
                 request(options, function (error, response, body) {
                     if (!error && response.statusCode == 200) {
                         log.info("POST /jobs result: %s", body);
-                        console.log(body.status);
                         if (body.status == "OK") {
                             res.redirect('/dashboard');
                         } else {
@@ -180,7 +178,6 @@ app.post('/login', function(req, res) {
     request(options, function (error, response, body) {
       if (!error && response.statusCode == 200) {
         log.info(body);
-        console.log(body.status);
         if(body.status == "OK") {
             sess.token = body.token
             res.redirect('/dashboard');
@@ -223,7 +220,7 @@ app.post('/register', function(req, res) {
 
     request(options, function (error, response, body) {
       if (!error && response.statusCode == 200) {
-        console.log(body.status);
+        log.info(body);
         if(body.status == "OK") {
             res.render("home");
         } else {
@@ -235,6 +232,39 @@ app.post('/register', function(req, res) {
 });
 
 
+app.get('/test', function(req, res) {
+
+    var sess = req.session
+    if (!sess.token) {
+        res.redirect('/login');
+        return;
+    }
+
+    var options = {
+      uri: 'http://auth-svc:8081/test',
+      method: 'GET',
+
+      headers: {
+        "Content-type": "application/json",
+        "Authorization": "Bearer " + sess.token
+      },
+
+      json: {}
+    };
+
+    request(options, function (error, response, body) {
+      if (!error && response.statusCode == 200) {
+        log.info(body);
+        if(body.status == "OK") {
+            res.render("home");
+        } else {
+            res.redirect("/register/1");
+        }
+      }
+    });
+
+});
+
 /** SERVER **/
 
 var server = app.listen(8080, '0.0.0.0', function () {
@@ -242,5 +272,4 @@ var server = app.listen(8080, '0.0.0.0', function () {
   var port = server.address().port;
 
   log.info("example app listening at http://%s:%s", host, port);
-    //console.log("example app listening at http://%s:%s", host, port);
 });

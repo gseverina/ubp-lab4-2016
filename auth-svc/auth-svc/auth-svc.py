@@ -41,7 +41,7 @@ mysql_config = {
 app = Bottle()
 
 JWT_TOKEN_NOT_BEFORE_TIMEDELTA = 10
-print '##### Generating token'
+logger.debug('Loading private key')
 private_key_file = os.path.join(os.path.dirname(__file__), 'keypair.priv')
 with open(private_key_file, 'r') as fd:
     private_key = RSA.importKey(fd.read())
@@ -73,6 +73,7 @@ def init_db():
 @app.route('/test', method='GET')
 def get_test():
     logger.info('Processing GET /test')
+    logger.debug('Authorization: {}'.format(request.headers['Authorization']))
     retdata = {
         "status": "OK"
     }
